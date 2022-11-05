@@ -1,0 +1,118 @@
+#!/bin/bash
+
+#####################################################################################################
+#
+#	vtspice - Running SPICE simulations on remote servers 
+#
+#	Author:		nxg-nxg
+#	Repository:	https://github.com/nxg-nxg/vtspice.git
+#	Date:		2022/11/05
+#
+#####################################################################################################
+
+## 			DEPENDENCY
+## - hspice (You can change to other SPICE like ngspice)
+## - screen
+## - ssh,scp
+##
+##
+## 			BEFORE USING
+## This script transfers local files to a remote server via scp 
+## and runs the simulation on the remote server with screen 
+## virtual terminal. Depending on your machine configuration, 
+## you may need to enter a password for the ssh connection. 
+## If this is inconvenient, it is recommended to create a 
+## special user on remote server who can only execute SPICE 
+## commands and use public key authentication without a password.
+##
+##
+## 			VARIABLES
+## Username who run simulation on remote server
+REMOTEUSR="user1"
+
+## IP adress of remote server
+REMOTEIP="192.168.0.100"
+
+## Path of simulation run-directory on remote server (Do not include the / at the end)
+REMOTERUNDIR="/home/remoteuser/spice_rundir"
+
+## Username who run vtspice script on local server
+LOCALUSR="localuser"
+
+## IP adress of local server (Do not use 127.0.0.1 or localhost)
+LOCALIP="192.168.0.5"
+
+## Path of vtspice run-directory on local server (Do not include the / at the end)
+LOCALRUNDIR=`pwd` # No change is required
+
+## The number of CPU threads used in simulation (for HSPICE -mt option)
+MT="8"
+
+#####################################################################################################
+
+## INPUT CHECK
+if [ $# == 0 ] || [ $1 == "--help" ] || [ $1 == "-help" ] || [ $1 == "-h" ]
+then
+        echo "EXAMPLE: vtspice INV.sp INV.inp netlist mos.mdl mos.skw..."
+        echo "USAGE  : vtspice <.sp file> <other files>"
+		echo "TIPS   : Putting model files on remote server reduces the num of args"
+        exit 0
+fi
+
+
+## REQUEST SIMULATION TO REMOTE SERVER
+if [ $1 != "run" ]
+then 
+	HEADFILE=$1
+	OTHERFILES=${@:2}
+	
+	# FILES (INCLUDE THIS SCRIPT) IS SENT TO REMOTE SERVER
+	scp $0 ${HEADFILE} ${OTHERFILES} ${REMOTEUSR}@${REMOTEIP}:${REMOTERUNDIR}
+	if [ $? != 0 ]
+	then 
+		echo "scp command failed"
+		exit 0
+	fi
+
+	# RUN vtspice SCRIPT WITH VIRTUAL TERMINAL
+	ssh -t ${REMOTEUSR}@${REMOTEIP} screen "sh -c \"cd ${REMOTERUNDIR}; ./vtspice run ${LOCALRUNDIR} ${HEADFILE} ${OTHERFILES}\""
+
+	# REMOVE vtspice SCRIPT ON REMOTE SERVER
+	ssh ${REMOTEUSR}@${REMOTEIP} rm ${REMOTERUNDIR}/vtspice -f
+
+	echo "vtspice finished successfully!"
+fi
+
+
+## RUN SIMULATION ON REMOTE SERVER
+if [ $1 == "run" ]
+then 
+	LOCALRUNDIR=$2
+	HEADFILE=$3
+	OTHERFILES=$4
+	REMOTERUNDIR=`pwd`
+	CELLNAME=${HEADFILE%.*}
+
+	cd ${REMOTERUNDIR}
+
+	# IF YOU INTERRUPT THE SIMULATION WITH Ctrl+C, RESULT FILE IS SENT TO LOCAL SERVER
+	RESULTFILES=`ls ./${CELLNAME}.*`
+	trap 'scp ${RESULTFILES} ${LOCALUSR}@${LOCALIP}:${LOCALRUNDIR}' 2
+	
+	# YOU CAN CHANGE THIS LINE TO OTHER SPICE LIKE NGSPICE (CHANGE OPTION TOO)
+	hspice ${HEADFILE} -mt ${MT} -hpp | tee ${CELLNAME}.spice.log
+	
+	# RESULT FILES IS SENT TO LOCAL SERVER
+	RESULTFILES=`ls ./${CELLNAME}.*`
+	scp ${RESULTFILES} ${LOCALUSR}@${LOCALIP}:${LOCALRUNDIR}
+
+	# REMOVE RESULT FILES
+	rm ./${HEADFILE} ./${OTHERFILES} -f
+	rm ./${CELLNAME}.* -f
+	
+	echo "FINISHED : See \"${LOCALRUNDIR}\"@${LOCALIP}"
+	read -p "Enter to exit: "
+fi
+
+
+
