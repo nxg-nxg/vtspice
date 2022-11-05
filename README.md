@@ -1,6 +1,6 @@
 # vtspice
 
-vtspice is a bash script that runs SPICE simulations on a remote server.
+vtspice is a bash script that runs SPICE simulations on a remote server. If the server is not powerful enough, it is difficult to use EDA while the simulation is running. This script allows you to separate the local server for EDA and the remote server for running SPICE simulations. Furthermore, the simulation will not be interrupted if the network connection is lost (this is important!).
 
 ## Dependency
 
