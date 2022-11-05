@@ -19,7 +19,7 @@ This script transfers local files to a remote server via scp command and runs th
 
 ## Setup
 
--   Check command in Dependency section in README.md is available.
+-   Check the commands in Dependency section in README.md is available.
 -   Create run-directory on remote server (ex. `/home/remoteuser/spice_rundir`).
 -   Edit VARIABLES section in vtspice script, and set below items.
     -   `REMOTEUSR`, Username who run simulation on remote server
@@ -77,8 +77,6 @@ In this case, you may need to edit the path of `.include` or `.lib` statement in
 ## Change SPICE simulator
 
 If you want to use other SPICE simulator like `ngspice`, Edit the following part of the script (around line 100).
-
-**vtspice**
 
 ```
 # YOU CAN CHANGE THIS LINE TO OTHER SPICE LIKE NGSPICE (CHANGE OPTION TOO)
