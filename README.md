@@ -26,7 +26,7 @@ vtspice is a bash script that runs SPICE simulations on a remote server.
 
 ## How To Run
 
-Place SPICE files to local directory (ex. inverter.sp, inverter.inp, netlist, mos.mdl, mos.skw).
+Place SPICE files (ex. inverter.sp, inverter.inp, netlist, mos.mdl, mos.skw) to local directory.
 
 **inverter.sp**
 
