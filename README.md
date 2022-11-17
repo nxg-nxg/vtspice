@@ -4,12 +4,12 @@ vtspice is a bash script that runs SPICE simulations on a remote server. If the 
 
 ## Dependency
 
--   Remote And Local Server: `ssh`, `scp`
+-   Remote And Local Server: `ssh`, `scp` (Make sure SSH connection is available from local to remote)
 -   Remote Server Only: `screen`, `hspice` (You can use other SPICE like `ngspice`. See "Change SPICE simulator" section at the bottom of the README.md)
 
 ## Before Using
 
--   This script transfers local files to a remote server via scp command and runs the simulation on the remote server with screen command. Depending on your machine configuration, you may need to enter a password for the ssh connection. If this is inconvenient, it is recommended to create a special user on remote server who can only execute SPICE commands and use public key authentication without a password.
+-   This script transfers local files to a remote server via scp command and runs the simulation on the remote server with screen command. If a passphrase is set for the SSH private key, you will need to enter the passphrase 4 times. If this is inconvenient, it is recommended to create a special user on remote server who can only execute SPICE commands and use public key authentication without a password.
 -   Even if the terminal is closed during simulation, the simulation continues on the virtual terminal on the remote server. `ssh` to the remote server and run `screen -r`. If you want to interrupt the simulation, type <kbd>Ctrl</kbd>+<kbd>C</kbd>.
 
 ## Setup
