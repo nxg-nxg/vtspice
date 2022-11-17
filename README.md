@@ -50,14 +50,14 @@ The files specified in the options will then be transferred to the remote server
 Any type or number of files is acceptable.
 
 ```
-$ vtspice inverter.sp stimulus.sp meas.sp netlist.spf  mos.mdl mos.skw diode.mdl
+$ vtspice inverter.sp stimulus.sp meas.sp netlist.spf mos.mdl mos.skw diode.mdl
 ```
 
 It should be noted that these commands are interpreted as follows.
 Therefore, be careful which file you use for the **first argument**; the order after the second is unimportant.
 
 ```
-$ hspice inverter.sp
+$ /path/to/hspice inverter.sp
 ```
 
 If you can place library file or device model on the remote server, fewer arguments are required.
@@ -75,6 +75,7 @@ In this case, you may need to edit the path of `.include` or `.lib` statement in
 ```
 # AFTER
 .include "/home/remoteuser/design/rules/mos.mdl"
+# OR
 .include "~/design/rules/mos.mdl"
 ```
 
@@ -85,7 +86,7 @@ If you want to use other SPICE simulator like `ngspice`, Edit "VARIABLES" sectio
 ```
 # BEFORE
 ## The type of SPICE simulator (Options defined in aliases are stripped)
-SPICE="hspice"
+SPICE="/path/to/hspice"
 
 ## Options given to SPICE commands
 OPTIONS="-mt 8 -hpp"
@@ -93,11 +94,13 @@ OPTIONS="-mt 8 -hpp"
 ```
 # AFTER
 ## The type of SPICE simulator (Options defined in aliases are stripped)
-SPICE="ngspice"
+SPICE="/path/to/ngspice"
 
 ## Options given to SPICE commands
 OPTIONS=""
 ```
+
+## Options of SPICE command
 
 Some machine configurations may have SPICE commands aliased.
 
