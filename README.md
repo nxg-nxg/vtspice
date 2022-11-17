@@ -46,18 +46,18 @@ Then, open a terminal in the directory, and run the following command.
 $ vtspice inverter.sp netlist mos.mdl
 ```
 
-The files specified in the options will then be transferred to the remote server via SCP command.
-Any type or number of files is acceptable.
-
-```
-$ vtspice inverter.sp stimulus.sp meas.sp netlist.spf mos.mdl mos.skw diode.mdl
-```
-
 It should be noted that these commands are interpreted as follows.
 Therefore, be careful which file you use for the **first argument**; the order after the second is unimportant.
 
 ```
 $ /path/to/hspice inverter.sp
+```
+
+The files specified in the options will then be transferred to the remote server via SCP command.
+Any type or number of files is acceptable.
+
+```
+$ vtspice inverter.sp netlist mos.mdl mos.skw diode.mdl cap.mdl
 ```
 
 If you can place library file or device model on the remote server, fewer arguments are required.
