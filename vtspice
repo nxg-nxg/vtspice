@@ -36,15 +36,6 @@ REMOTEIP="192.168.0.100"
 ## Path of directory for vtspice on remote server (Do not include the / at the end)
 REMOTEVTSDIR="/home/remoteuser/vtspice"
 
-## Username who run vtspice script on local server
-LOCALUSR="localuser"
-
-## IP adress of local server (Do not use 127.0.0.1 or localhost)
-LOCALIP="192.168.0.5"
-
-## Path of vtspice run-directory on local server (Do not include the / at the end)
-LOCALRUNDIR=`pwd` # No change is required
-
 ## Path to the original file of the SPICE command (Use `which hspice`)
 SPICE="/path/to/hspice"
 
@@ -70,8 +61,6 @@ then
 	HEADFILE=$1
 	OTHERFILES=${@:2}
 	RUNDATE=`date "+%m%d%H%M%S"`
-	SCRIPTNAME=`basename $0`
-	CELLNAME=${HEADFILE%.*}
 
 	# FILES (INCLUDE THIS SCRIPT) IS SENT TO REMOTE SERVER
 	mkdir ${RUNDATE}
@@ -93,15 +82,14 @@ then
 	rm -rf ${RUNDATE}
 
 	# RUN vtspice SCRIPT WITH VIRTUAL TERMINAL
-	ssh -t ${REMOTEUSR}@${REMOTEIP} screen "sh -c \"cd ${REMOTEVTSDIR}/${RUNDATE}; ./vtspice run ${LOCALRUNDIR} ${HEADFILE} ${OTHERFILES} ${RUNDATE}\""
+	ssh -t ${REMOTEUSR}@${REMOTEIP} screen "sh -c \"cd ${REMOTEVTSDIR}/${RUNDATE}; ./vtspice run ${HEADFILE} ${OTHERFILES} ${RUNDATE}\""
 
 	# COPY RESULT FILES ON REMOTE SERVER TO LOCAL SERVER
-	scp -r ${REMOTEUSR}@${REMOTEIP}:${REMOTEVTSDIR}/${RUNDATE}/* ${LOCALRUNDIR}
+	scp -r ${REMOTEUSR}@${REMOTEIP}:${REMOTEVTSDIR}/${RUNDATE}/* ./
 
 	# REMOVE RESULT FILES ON REMOTE SERVER
 	ssh ${REMOTEUSR}@${REMOTEIP} rm -rf ${REMOTEVTSDIR}/${RUNDATE}
 	
-	echo "FINISHED: See \"${LOCALRUNDIR}\"@${LOCALIP}"
 	echo "FINISHED: vtspice finished successfully!"
 fi
 
@@ -109,18 +97,10 @@ fi
 ## RUN SIMULATION ON REMOTE SERVER
 if [ $1 == "run" ]
 then 
-	LOCALRUNDIR=$2
-	HEADFILE=$3
-	OTHERFILES=$4
-	RUNDATE=$5
-	REMOTEVTSDIR=`pwd`
+	HEADFILE=$2
+	OTHERFILES=$3
+	RUNDATE=$4
 	CELLNAME=${HEADFILE%.*}
-
-	cd ${REMOTEVTSDIR}/${RUNDATE}
-
-	# IF YOU INTERRUPT THE SIMULATION WITH Ctrl+C, RESULT FILE IS SENT TO LOCAL SERVER
-	RESULTFILES=`ls ./${CELLNAME}.*`
-	trap 'scp ${RESULTFILES} ${LOCALUSR}@${LOCALIP}:${LOCALRUNDIR}' 2
 	
 	# START SIMULATION
 	"${SPICE}" ${HEADFILE} ${OPTIONS} | tee ${CELLNAME}.spice.log

@@ -21,8 +21,6 @@ vtspice is a bash script that runs SPICE simulations on a remote server. If the 
     -   `REMOTEUSR`, Username who run simulation on remote server
     -   `REMOTEIP`, IP adress of remote server
     -   `REMOTEVTSDIR`, Path to directory for vtspice on remote server (Cannot end of path with "/")
-    -   `LOCALUSR`, Username who run vtspice script on local server
-    -   `LOCALIP`, IP adress of local server (127.0.0.1 or localhost cannot be used)
     -   `SPICE`, Path to the original file of the SPICE command (Use `which` command, like `which hspice`)
     -   `OPTIONS`, Options given to SPICE commands
 -   Place the script in some directory on local server (ex. `/home/localuser/.local/vtspice`), and set environment variable PATH.
