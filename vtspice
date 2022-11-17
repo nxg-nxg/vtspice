@@ -45,8 +45,8 @@ LOCALIP="192.168.0.5"
 ## Path of vtspice run-directory on local server (Do not include the / at the end)
 LOCALRUNDIR=`pwd` # No change is required
 
-## The type of SPICE simulator (Options defined in aliases are stripped)
-SPICE="hspice"
+## Path to the original file of the SPICE command (Use `which hspice`)
+SPICE="/path/to/hspice"
 
 ## Options given to SPICE commands
 OPTIONS="-mt 8 -hpp"

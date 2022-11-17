@@ -20,10 +20,10 @@ vtspice is a bash script that runs SPICE simulations on a remote server. If the 
 -   Edit "VARIABLES" section in vtspice script, and set below items.
     -   `REMOTEUSR`, Username who run simulation on remote server
     -   `REMOTEIP`, IP adress of remote server
-    -   `REMOTEVTSDIR`, Path of directory fot vtspice on remote server (Cannot end of path with "/")
+    -   `REMOTEVTSDIR`, Path to directory for vtspice on remote server (Cannot end of path with "/")
     -   `LOCALUSR`, Username who run vtspice script on local server
     -   `LOCALIP`, IP adress of local server (127.0.0.1 or localhost cannot be used)
-    -   `SPICE`, The type of SPICE simulator, like hspice or ngspice (Options defined in aliases are stripped)
+    -   `SPICE`, Path to the original file of the SPICE command (Use `which` command, like `which hspice`)
     -   `OPTIONS`, Options given to SPICE commands
 -   Place the script in some directory on local server (ex. `/home/localuser/.local/vtspice`), and set environment variable PATH.
 
@@ -103,8 +103,8 @@ Some machine configurations may have SPICE commands aliased.
 
 ```
 $ which hspice
-hspice:    aliased to /path/to/spice/hspice64 -mt 4 -hpp -i
+hspice:    aliased to /path/to/hspice -mt 4 -hpp -i
 ```
 
-Therefore, vtspice strips the options by default.
-Any necessary options should be entered in the `OPTIONS` of the "VARIABLES" section.
+Therefore, specify the original file in `SPICE` (In the above example, `/path/to/hspice`)
+and specify the required command options in `OPTIONS` in the "VARIABLES" section.
