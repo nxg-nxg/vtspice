@@ -15,7 +15,8 @@ vtspice is a bash script that runs SPICE simulations on a remote server. If the 
 ## Setup
 
 -   Check the commands in "Dependency" section in README.md is available.
--   Create directory fot vtspice on remote server (ex. `/home/remoteuser/vtspice`).
+-   Download the vtspice script from Releases or `git clone https://github.com/nxg-nxg/vtspice.git`
+-   Create directory for vtspice on remote server (ex. `/home/remoteuser/vtspice`).
 -   Edit "VARIABLES" section in vtspice script, and set below items.
     -   `REMOTEUSR`, Username who run simulation on remote server
     -   `REMOTEIP`, IP adress of remote server
