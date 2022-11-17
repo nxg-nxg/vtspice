@@ -6,7 +6,7 @@
 #
 #	Author:		nxg-nxg
 #	Repository:	https://github.com/nxg-nxg/vtspice.git
-#	Date:		2022/11/17
+#	Date:		2022/11/18
 #
 #####################################################################################################
 
@@ -71,6 +71,7 @@ then
 	OTHERFILES=${@:2}
 	RUNDATE=`date "+%m%d%H%M%S"`
 	SCRIPTNAME=`basename $0`
+	CELLNAME=${HEADFILE%.*}
 
 	# FILES (INCLUDE THIS SCRIPT) IS SENT TO REMOTE SERVER
 	mkdir ${RUNDATE}
@@ -94,6 +95,13 @@ then
 	# RUN vtspice SCRIPT WITH VIRTUAL TERMINAL
 	ssh -t ${REMOTEUSR}@${REMOTEIP} screen "sh -c \"cd ${REMOTEVTSDIR}/${RUNDATE}; ./vtspice run ${LOCALRUNDIR} ${HEADFILE} ${OTHERFILES} ${RUNDATE}\""
 
+	# COPY RESULT FILES ON REMOTE SERVER TO LOCAL SERVER
+	scp -r ${REMOTEUSR}@${REMOTEIP}:${REMOTEVTSDIR}/${RUNDATE}/* ${LOCALRUNDIR}
+
+	# REMOVE RESULT FILES ON REMOTE SERVER
+	ssh ${REMOTEUSR}@${REMOTEIP} rm -rf ${REMOTEVTSDIR}/${RUNDATE}
+	
+	echo "FINISHED: See \"${LOCALRUNDIR}\"@${LOCALIP}"
 	echo "FINISHED: vtspice finished successfully!"
 fi
 
@@ -119,20 +127,6 @@ then
 
 	# REMOVE FILES WHICH SENT FROM LOCAL SERVER
 	rm ./${HEADFILE} ./${OTHERFILES} -f
-	
-	# RESULT FILES IS SENT TO LOCAL SERVER
-	RESULTFILES=`ls ./${CELLNAME}.*`
-	scp ${RESULTFILES} ${LOCALUSR}@${LOCALIP}:${LOCALRUNDIR}
-
-	# REMOVE RESULT FILES
-	rm ./${CELLNAME}.* -f
-	
-	echo "FINISHED: See \"${LOCALRUNDIR}\"@${LOCALIP}"
-	read -p "Enter to exit: "
-
-	rm $0 -f
-	cd ..
-	rmdir ${RUNDATE}
 fi
 
 
