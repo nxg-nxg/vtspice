@@ -6,7 +6,7 @@
 #
 #	Author:		nxg-nxg
 #	Repository:	https://github.com/nxg-nxg/vtspice.git
-#	Date:		2022/11/05
+#	Date:		2022/11/17
 #
 #####################################################################################################
 
@@ -33,8 +33,8 @@ REMOTEUSR="user1"
 ## IP adress of remote server
 REMOTEIP="192.168.0.100"
 
-## Path of simulation run-directory on remote server (Do not include the / at the end)
-REMOTERUNDIR="/home/remoteuser/spice_rundir"
+## Path of directory for vtspice on remote server (Do not include the / at the end)
+REMOTEVTSDIR="/home/remoteuser/vtspice"
 
 ## Username who run vtspice script on local server
 LOCALUSR="localuser"
@@ -45,8 +45,12 @@ LOCALIP="192.168.0.5"
 ## Path of vtspice run-directory on local server (Do not include the / at the end)
 LOCALRUNDIR=`pwd` # No change is required
 
-## The number of CPU threads used in simulation (for HSPICE -mt option)
-MT="8"
+## The type of SPICE simulator (Options defined in aliases are stripped)
+SPICE="hspice"
+
+## Options given to SPICE commands
+OPTIONS="-mt 8 -hpp"
+
 
 #####################################################################################################
 
@@ -65,22 +69,32 @@ if [ $1 != "run" ]
 then 
 	HEADFILE=$1
 	OTHERFILES=${@:2}
-	
+	RUNDATE=`date "+%m%d%H%M%S"`
+	SCRIPTNAME=`basename $0`
+
 	# FILES (INCLUDE THIS SCRIPT) IS SENT TO REMOTE SERVER
-	scp $0 ${HEADFILE} ${OTHERFILES} ${REMOTEUSR}@${REMOTEIP}:${REMOTERUNDIR}
+	mkdir ${RUNDATE}
+	cp $0 ${HEADFILE} ${OTHERFILES} ${RUNDATE}/
 	if [ $? != 0 ]
 	then 
-		echo "scp command failed"
+		echo "ERROR: No such file."
+		rm -rf ${RUNDATE}
 		exit 0
 	fi
 
+	scp -r ${RUNDATE} ${REMOTEUSR}@${REMOTEIP}:${REMOTEVTSDIR}
+	if [ $? != 0 ]
+	then 
+		echo "ERROR: scp command failed."
+		rm -rf ${RUNDATE}
+		exit 0
+	fi
+	rm -rf ${RUNDATE}
+
 	# RUN vtspice SCRIPT WITH VIRTUAL TERMINAL
-	ssh -t ${REMOTEUSR}@${REMOTEIP} screen "sh -c \"cd ${REMOTERUNDIR}; ./vtspice run ${LOCALRUNDIR} ${HEADFILE} ${OTHERFILES}\""
+	ssh -t ${REMOTEUSR}@${REMOTEIP} screen "sh -c \"cd ${REMOTEVTSDIR}/${RUNDATE}; ./vtspice run ${LOCALRUNDIR} ${HEADFILE} ${OTHERFILES} ${RUNDATE}\""
 
-	# REMOVE vtspice SCRIPT ON REMOTE SERVER
-	ssh ${REMOTEUSR}@${REMOTEIP} rm ${REMOTERUNDIR}/vtspice -f
-
-	echo "vtspice finished successfully!"
+	echo "FINISHED: vtspice finished successfully!"
 fi
 
 
@@ -90,17 +104,18 @@ then
 	LOCALRUNDIR=$2
 	HEADFILE=$3
 	OTHERFILES=$4
-	REMOTERUNDIR=`pwd`
+	RUNDATE=$5
+	REMOTEVTSDIR=`pwd`
 	CELLNAME=${HEADFILE%.*}
 
-	cd ${REMOTERUNDIR}
+	cd ${REMOTEVTSDIR}/${RUNDATE}
 
 	# IF YOU INTERRUPT THE SIMULATION WITH Ctrl+C, RESULT FILE IS SENT TO LOCAL SERVER
 	RESULTFILES=`ls ./${CELLNAME}.*`
 	trap 'scp ${RESULTFILES} ${LOCALUSR}@${LOCALIP}:${LOCALRUNDIR}' 2
 	
-	# YOU CAN CHANGE THIS LINE TO OTHER SPICE LIKE NGSPICE (CHANGE OPTION TOO)
-	hspice ${HEADFILE} -mt ${MT} -hpp | tee ${CELLNAME}.spice.log
+	# START SIMULATION
+	"${SPICE}" ${HEADFILE} ${OPTIONS} | tee ${CELLNAME}.spice.log
 
 	# REMOVE FILES WHICH SENT FROM LOCAL SERVER
 	rm ./${HEADFILE} ./${OTHERFILES} -f
@@ -112,8 +127,12 @@ then
 	# REMOVE RESULT FILES
 	rm ./${CELLNAME}.* -f
 	
-	echo "FINISHED : See \"${LOCALRUNDIR}\"@${LOCALIP}"
+	echo "FINISHED: See \"${LOCALRUNDIR}\"@${LOCALIP}"
 	read -p "Enter to exit: "
+
+	rm $0 -f
+	cd ..
+	rmdir ${RUNDATE}
 fi
 
 
