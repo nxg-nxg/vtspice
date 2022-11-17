@@ -57,16 +57,16 @@ The files specified in the options will then be transferred to the remote server
 Any type or number of files is acceptable.
 
 ```
-$ vtspice inverter.sp netlist mos.mdl mos.skw diode.mdl cap.mdl
+$ vtspice inverter.sp netlist stimulus.sp meas_file mos.mdl mos.lib diode.mdl cap.mdl
 ```
 
 If you can place library file or device model on the remote server, fewer arguments are required.
 
 ```
-$ vtspice inverter.sp netlist
+$ vtspice inverter.sp netlist stimulus.sp meas_file
 ```
 
-In this case, you may need to edit the path of `.include` or `.lib` statement in SPICE files.
+In this case, you may need to edit the path of `.include` or `.lib` statement in your SPICE files.
 
 ```
 # BEFORE
