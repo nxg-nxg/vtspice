@@ -126,7 +126,7 @@ then
 	"${SPICE}" ${HEADFILE} ${OPTIONS} | tee ${CELLNAME}.spice.log
 
 	# REMOVE FILES WHICH SENT FROM LOCAL SERVER
-	rm ./${HEADFILE} ./${OTHERFILES} -f
+	rm ./${HEADFILE} ./${OTHERFILES} $0 -f
 fi
 
 
