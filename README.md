@@ -13,7 +13,7 @@ If a passphrase is set for the SSH private key, you will need to enter the passp
 
 ## Setup
 
--   Check the commands in "Dependency" in README.md is available.
+-   Check the commands in "[Dependency](./README.md#dependency)" in README.md is available.
 -   Download the vtspice script from Releases or `git clone https://github.com/nxg-nxg/vtspice.git`
 -   Create directory for vtspice on remote server (ex. `/home/remoteuser/vtspice`).
 -   Edit "Variables" section in vtspice script, and set below items.
@@ -72,7 +72,9 @@ In this case, you may need to edit the path of `.include` or `.lib` statement in
 ```
 # AFTER
 .include "/home/remoteuser/design/rules/mos.mdl"
-# OR
+```
+```
+# A Better Way
 .include "~/design/rules/mos.mdl"
 ```
 
@@ -82,7 +84,7 @@ After copying is complete, files on the remote server are automatically deleted.
 ## Reconnection and Interruption
 Even if you accidentally close the terminal or disconnect from the network, don't worry. 
 The simulation continues on the remote server, and the results file is not deleted when the simulation is complete 
-(Therefore, when the resulting file is no longer needed, it must be deleted by you.).
+(Therefore, when the results file is no longer needed, it must be deleted by you.).
 
 `ssh` to the remote server and run `screen -ls`. Then, screen sockets are listed.
 The following is an example of two runs of inverter.sp. 
