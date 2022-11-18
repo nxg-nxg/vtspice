@@ -112,7 +112,7 @@ A log file and incomplete results file will be returned to directory where vtspi
 
 
 ## SPICE simulator and Options
-For `SPICE` in vtspice script, specify the original file of the SPICE command (not the alias)
+For `SPICE` in vtspice script, specify the original file of the SPICE command (not the alias).
 
 Some machine configurations may have SPICE commands aliased.
 This makes it difficult to know what options you are specifying.
