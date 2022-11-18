@@ -6,17 +6,17 @@
 #
 #	Author:		nxg-nxg
 #	Repository:	https://github.com/nxg-nxg/vtspice.git
-#	Date:		2022/11/18
+#	Date:		2022/11/19
 #
 #####################################################################################################
 
-## 			DEPENDENCY
+## 			Dependency
 ## - hspice (You can change to other SPICE like ngspice)
 ## - screen
 ## - ssh,scp
 ##
 ##
-## 			BEFORE USING
+## 			Before Using
 ## This script transfers local files to a remote server via scp 
 ## and runs the simulation on the remote server with screen 
 ## virtual terminal. Depending on your machine configuration, 
@@ -26,7 +26,7 @@
 ## commands and use public key authentication without a password.
 ##
 ##
-## 			VARIABLES
+## 			Variables
 ## Username who run simulation on remote server
 REMOTEUSR="user1"
 
@@ -45,56 +45,63 @@ OPTIONS="-mt 8 -hpp"
 
 #####################################################################################################
 
-## INPUT CHECK
+## Input check
 if [ $# == 0 ] || [ $1 == "--help" ] || [ $1 == "-help" ] || [ $1 == "-h" ]
 then
-        echo "EXAMPLE: vtspice INV.sp INV.inp netlist mos.mdl mos.skw..."
+        echo "EXAMPLE: vtspice INV.sp netlist mos.mdl mos.skw..."
         echo "USAGE  : vtspice <.sp file> <other files>"
-		echo "TIPS   : Putting model files on remote server reduces the num of args"
         exit 0
 fi
 
 
-## REQUEST SIMULATION TO REMOTE SERVER
+## Request simulation to remote server
 if [ $1 != "run" ]
 then 
 	HEADFILE=$1
 	OTHERFILES=${@:2}
 	RUNDATE=`date "+%m%d%H%M%S"`
+	CELLNAME=${HEADFILE%.*}
+	SOCKETNAME="$CELLNAME-$RUNDATE"
 
-	# FILES (INCLUDE THIS SCRIPT) IS SENT TO REMOTE SERVER
-	mkdir ${RUNDATE}
-	cp $0 ${HEADFILE} ${OTHERFILES} ${RUNDATE}/
+	# Files (include this script) is sent to remote server
+	mkdir $RUNDATE
+	cp $0 $HEADFILE $OTHERFILES $RUNDATE/
 	if [ $? != 0 ]
 	then 
 		echo "ERROR: No such file."
-		rm -rf ${RUNDATE}
+		rm -rf $RUNDATE
 		exit 0
 	fi
 
-	scp -r ${RUNDATE} ${REMOTEUSR}@${REMOTEIP}:${REMOTEVTSDIR}
+	scp -r $RUNDATE $REMOTEUSR@$REMOTEIP:$REMOTEVTSDIR
 	if [ $? != 0 ]
 	then 
 		echo "ERROR: scp command failed."
-		rm -rf ${RUNDATE}
+		rm -rf $RUNDATE
 		exit 0
 	fi
-	rm -rf ${RUNDATE}
+	rm -rf $RUNDATE
 
-	# RUN vtspice SCRIPT WITH VIRTUAL TERMINAL
-	ssh -t ${REMOTEUSR}@${REMOTEIP} screen "sh -c \"cd ${REMOTEVTSDIR}/${RUNDATE}; ./vtspice run ${HEADFILE} ${OTHERFILES} ${RUNDATE}\""
+	# Run vtspice script with virtual terminal
+	ssh -t $REMOTEUSR@$REMOTEIP screen -S $SOCKETNAME "sh -c \"cd $REMOTEVTSDIR/$RUNDATE; ./vtspice run $HEADFILE $OTHERFILES $RUNDATE\""
 
-	# COPY RESULT FILES ON REMOTE SERVER TO LOCAL SERVER
-	scp -r ${REMOTEUSR}@${REMOTEIP}:${REMOTEVTSDIR}/${RUNDATE}/* ./
+	# Copy result files on remote server to local server
+	scp -r $REMOTEUSR@$REMOTEIP:$REMOTEVTSDIR/$RUNDATE/* ./
+	if [ $? != 0 ]
+	then 
+		echo "ERROR: scp command failed."
+		echo "ERROR: ssh into the remote server and look at the results file directly."
+		exit 0
+	fi
 
-	# REMOVE RESULT FILES ON REMOTE SERVER
-	ssh ${REMOTEUSR}@${REMOTEIP} rm -rf ${REMOTEVTSDIR}/${RUNDATE}
+	# Remote result files on remote server
+	ssh $REMOTEUSR@$REMOTEIP rm -rf $REMOTEVTSDIR/$RUNDATE
 	
 	echo "FINISHED: vtspice finished successfully!"
 fi
 
 
-## RUN SIMULATION ON REMOTE SERVER
+## Run simulation on remote server
 if [ $1 == "run" ]
 then 
 	HEADFILE=$2
@@ -102,11 +109,11 @@ then
 	RUNDATE=$4
 	CELLNAME=${HEADFILE%.*}
 	
-	# START SIMULATION
-	"${SPICE}" ${HEADFILE} ${OPTIONS} | tee ${CELLNAME}.spice.log
+	# Start simulation
+	"$SPICE" $HEADFILE $OPTIONS | tee $CELLNAME.spice.log
 
-	# REMOVE FILES WHICH SENT FROM LOCAL SERVER
-	rm ./${HEADFILE} ./${OTHERFILES} $0 -f
+	# Remote files watch sent from local server
+	rm ./$HEADFILE ./$OTHERFILES $0 -f
 fi
 
 
