@@ -5,7 +5,8 @@ vtspice is a bash script that runs SPICE simulations on a remote server. If the 
 ## Dependency
 
 -   `ssh`, `scp` (Make sure SSH connection is available from local to remote)
--   `screen`, SPICE simulator (See "[SPICE simulator and Options](./README.md#spice-simulator-and-options)" of the README.md) on **remote server**
+-   `screen` on **remote server**
+-   SPICE simulator (See "[SPICE simulator and Options](./README.md#spice-simulator-and-options)" of the README.md) on **remote server**
 
 ## Before Using
 
@@ -66,20 +67,21 @@ $ vtspice inverter.sp netlist stimulus.sp meas_file
 In this case, you may need to edit the path of `.include` or `.lib` statement in your SPICE files.
 
 ```
-# BEFORE
+# Before
 .include "/home/localuser/design/rules/mos.mdl"
 ```
 ```
-# AFTER
+# After
 .include "/home/remoteuser/design/rules/mos.mdl"
 ```
 ```
-# A Better Way
+# Better Way
 .include "~/design/rules/mos.mdl"
 ```
 
 When the simulation is complete, vtspice automatically copies the results file on remote server to local server.
 After copying is complete, files on the remote server are automatically deleted.
+If the copy fails, the result file on the remote server is not deleted.
 
 ## Reconnection and Interruption
 Even if you accidentally close the terminal or disconnect from the network, don't worry. 
@@ -110,8 +112,7 @@ A log file and incomplete results file will be returned to directory where vtspi
 
 
 ## SPICE simulator and Options
-For `SPICE` in "Variables" section in vtspice script, 
-specify the original file of the SPICE command (not the alias)
+For `SPICE` in vtspice script, specify the original file of the SPICE command (not the alias)
 
 Some machine configurations may have SPICE commands aliased.
 This makes it difficult to know what options you are specifying.
