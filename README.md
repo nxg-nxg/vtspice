@@ -4,8 +4,8 @@ vtspice is a bash script that runs SPICE simulations on a remote server. If the 
 
 ## Dependency
 
--   Remote And Local Server: `ssh`, `scp` (Make sure SSH connection is available from local to remote)
--   Remote Server Only: `screen`, `hspice` (You can use other SPICE like `ngspice`. See "Change SPICE simulator" section at the bottom of the README.md)
+-   `ssh`, `scp` (Make sure SSH connection is available from local to remote)
+-   `screen`, SPICE simulator (See "[SPICE simulator and Options](./README.md#spice-simulator-and-options)" of the README.md) on **remote server**
 
 ## Before Using
 
@@ -13,20 +13,20 @@ If a passphrase is set for the SSH private key, you will need to enter the passp
 
 ## Setup
 
--   Check the commands in "Dependency" section in README.md is available.
+-   Check the commands in "Dependency" in README.md is available.
 -   Download the vtspice script from Releases or `git clone https://github.com/nxg-nxg/vtspice.git`
 -   Create directory for vtspice on remote server (ex. `/home/remoteuser/vtspice`).
 -   Edit "Variables" section in vtspice script, and set below items.
     -   `REMOTEUSR`, Username who run simulation on remote server
     -   `REMOTEIP`, IP adress of remote server
     -   `REMOTEVTSDIR`, Path to directory for vtspice on remote server (Cannot end of path with "/")
-    -   `SPICE`, Path to the original file of the SPICE command (Use `which` command, like `which hspice` on remote server)
-    -   `OPTIONS`, Options given to SPICE commands
--   Place the script in some directory on local server (ex. `/home/localuser/.local/vtspice`), and set environment variable PATH.
+    -   `SPICE`, Path to SPICE command (See "[SPICE simulator and Options](./README.md#spice-simulator-and-options)" in README.md)
+    -   `OPTIONS`, Options given to SPICE command  (See "[SPICE simulator and Options](./README.md#spice-simulator-and-options)" in README.md)
+-   Place the script on local server (ex. `/home/localuser/.local/vtspice`), and set environment variable PATH.
 
 ## How To Run
 
-Place SPICE files (ex. inverter.sp, netlist, mos.mdl) to local directory.
+Place SPICE files (ex. inverter.sp, netlist, mos.mdl) on local server.
 
 **inverter.sp**
 
@@ -37,7 +37,7 @@ Place SPICE files (ex. inverter.sp, netlist, mos.mdl) to local directory.
 .end
 ```
 
-Then, open a terminal in the directory, and run the following command.
+Open a terminal in the directory where this file is located, and run the following.
 
 ```
 $ vtspice inverter.sp netlist mos.mdl
@@ -107,35 +107,31 @@ If you want to interrupt the simulation, type <kbd>Ctrl</kbd>+<kbd>C</kbd> on th
 A log file and incomplete results file will be returned to directory where vtspice was run.
 
 
-## Change SPICE simulator
-
-If you want to use other SPICE simulator like `ngspice`, Edit "Variables" section in vtspice script.
-
-```
-# BEFORE
-## The type of SPICE simulator (Options defined in aliases are stripped)
-SPICE="/path/to/hspice"
-
-## Options given to SPICE commands
-OPTIONS="-mt 8 -hpp"
-```
-```
-# AFTER
-## The type of SPICE simulator (Options defined in aliases are stripped)
-SPICE="/path/to/ngspice"
-
-## Options given to SPICE commands
-OPTIONS=""
-```
-
-## Options of SPICE command
+## SPICE simulator and Options
+For `SPICE` in "Variables" section in vtspice script, 
+specify the original file of the SPICE command (not the alias)
 
 Some machine configurations may have SPICE commands aliased.
+This makes it difficult to know what options you are specifying.
 
 ```
 $ which hspice
 hspice:    aliased to /path/to/hspice -mt 4 -hpp -i
 ```
 
-Therefore, specify the original file in `SPICE` (In the above example, `/path/to/hspice`)
-and specify the required command options in `OPTIONS` in the "Variables" section.
+In the above example, the original file is `/path/to/hspice`, and options are `-mt 4 -hpp -i`.
+Therefore, set the following.
+
+```
+## hspice
+SPICE="/path/to/hspice"
+OPTIONS="-mt 4 -hpp -i"
+```
+
+Of course, other SPICE such as `ngspice` can also be used.
+
+```
+## ngspice
+SPICE="/path/to/ngspice"
+OPTIONS=""
+```
